@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>微小的无效法术</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+    min-height:100vh;
+    color:#eee9f6;
+    font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:52px 20px 60px;
+    gap:26px;
+    overflow-x:hidden;
+    position:relative;
+}
+.bg{
+    position:fixed;inset:0;z-index:-3;
+    background:linear-gradient(160deg,#14111f 0%,#251b3d 48%,#1a142a 100%);
+}
+.glow{position:fixed;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:-2;}
+.glow-a{width:430px;height:430px;background:rgba(124,92,255,.30);top:-90px;left:-70px;animation:drift1 18s ease-in-out infinite alternate;}
+.glow-b{width:380px;height:380px;background:rgba(255,90,180,.17);bottom:-110px;right:-90px;animation:drift2 22s ease-in-out infinite alternate;}
+@keyframes drift1{to{transform:translate(50px,40px) scale(1.1);}}
+@keyframes drift2{to{transform:translate(-40px,-50px) scale(1.15);}}
+.stars{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;}
+.star{
+    position:absolute;bottom:-12px;border-radius:50%;background:#fff;
+    box-shadow:0 0 6px rgba(190,160,255,.85);
+    animation-name:rise;animation-timing-function:linear;animation-iteration-count:infinite;
+}
+@keyframes rise{
+    0%{transform:translateY(0) translateX(0);opacity:0;}
+    10%{opacity:.7;}
+    90%{opacity:.35;}
+    100%{transform:translateY(-108vh) translateX(24px);opacity:0;}
+}
+header{text-align:center;z-index:1;}
+h1{
+    font-size:30px;font-weight:500;letter-spacing:4px;
+    background:linear-gradient(90deg,#cfc4ff,#f3c6ff,#cfc4ff);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    text-shadow:0 0 28px rgba(170,130,255,.35);
+    animation:glow 4s ease-in-out infinite alternate;
+}
+@keyframes glow{to{text-shadow:0 0 40px rgba(200,150,255,.65);}}
+.subtitle{font-size:13px;letter-spacing:3px;opacity:.55;margin-top:10px;}
+.switch-wrap{display:flex;align-items:center;gap:12px;font-size:14px;letter-spacing:1px;opacity:.85;z-index:1;}
+.switch{
+    width:50px;height:26px;background:#3a314f;border-radius:99px;
+    position:relative;cursor:pointer;transition:.3s;border:1px solid rgba(255,255,255,.1);
+}
+.switch .knob{
+    position:absolute;width:20px;height:20px;background:#c8bfe0;border-radius:50%;
+    top:2px;left:2px;transition:.3s;box-shadow:0 2px 6px rgba(0,0,0,.35);
+}
+.switch.on{background:linear-gradient(90deg,#7c5cff,#b45cff);border-color:rgba(190,160,255,.6);}
+.switch.on .knob{transform:translateX(24px);background:#fff;}
+#drawBtn{
+    position:relative;padding:16px 42px;font-size:17px;letter-spacing:1px;color:#fff;
+    background:linear-gradient(135deg,#7c5cff,#b45cff);
+    border:none;border-radius:999px;cursor:pointer;transition:.25s;z-index:1;
+    box-shadow:0 10px 32px rgba(124,92,255,.45);
+}
+#drawBtn:hover{transform:translateY(-2px);box-shadow:0 14px 42px rgba(124,92,255,.65),inset 0 0 0 1px rgba(255,255,255,.18);}
+#drawBtn:active{transform:scale(.96);}
+.card{
+    width:min(540px,100%);
+    background:rgba(255,255,255,.06);
+    backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+    border:1px solid rgba(255,255,255,.14);
+    border-radius:20px;padding:30px 26px;
+    box-shadow:0 22px 60px rgba(0,0,0,.45);
+    position:relative;overflow:hidden;display:none;z-index:1;
+}
+.card::before{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(135deg,rgba(124,92,255,.16),transparent 60%);
+}
+.card.show{display:block;animation:cardIn .5s cubic-bezier(.22,.8,.36,1) both;}
+@keyframes cardIn{
+    from{opacity:0;transform:translateY(16px) scale(.97);}
+    to{opacity:1;transform:translateY(0) scale(1);}
+}
+.tag{
+    display:inline-block;font-size:12px;letter-spacing:2px;font-weight:600;
+    padding:5px 13px;border-radius:999px;margin-bottom:16px;
+}
+.tag.positive{background:rgba(82,220,160,.18);color:#b9f5dc;border:1px solid rgba(82,220,160,.55);}
+.tag.bless{background:rgba(124,92,255,.22);color:#cfc3ff;border:1px solid rgba(124,92,255,.55);}
+.tag.funny{background:rgba(255,168,80,.18);color:#ffd6a4;border:1px solid rgba(255,168,80,.55);}
+.tag.curse{background:rgba(255,82,140,.18);color:#ffb3ca;border:1px solid rgba(255,82,140,.55);}
+.content{font-size:18px;line-height:1.8;margin-bottom:20px;position:relative;z-index:1;}
+.tip{
+    font-size:12px;opacity:.5;border-top:1px solid rgba(255,255,255,.12);
+    padding-top:14px;position:relative;z-index:1;
+}
+#copyBtn{
+    margin-top:14px;font-size:13px;padding:7px 14px;background:rgba(124,92,255,.18);
+    border:1px solid rgba(190,160,255,.4);color:#e2dbff;border-radius:999px;cursor:pointer;
+    transition:.2s;position:relative;z-index:1;
+}
+#copyBtn:hover{background:rgba(124,92,255,.32);}
+.history-wrap{width:min(540px,100%);margin-top:6px;z-index:1;}
+.history-title{font-size:14px;letter-spacing:1px;opacity:.55;margin-bottom:12px;}
+.history-item{
+    font-size:13px;line-height:1.6;opacity:.6;margin-bottom:8px;padding-left:16px;
+    position:relative;transition:.2s;
+}
+.history-item::before{
+    content:"";position:absolute;left:2px;top:.55em;width:6px;height:6px;border-radius:50%;
+    background:#8f7cd8;box-shadow:0 0 8px rgba(143,124,216,.8);
+}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="glow glow-a"></div>
+<div class="glow glow-b"></div>
+<div class="stars" id="stars"></div>
+
+<header>
+    <h1>✦ 微小的无效法术 ✦</h1>
+    <p class="subtitle">抽一张对现实毫无效力的神秘签</p>
+</header>
+
+<div class="switch-wrap">
+    <span>仅祝福模式</span>
+    <div id="modeSwitch" class="switch"><span class="knob"></span></div>
+</div>
+
+<button id="drawBtn">✦ 抽取你的无效法术</button>
+
+<div class="card" id="resultCard">
+    <div class="tag" id="typeTag">无效祝福</div>
+    <div class="content" id="spellText"></div>
+    <div class="tip">⚠️ 本法术仅为精神娱乐，对现实没有任何效力</div>
+    <button id="copyBtn">复制文本</button>
+</div>
+
+<div class="history-wrap">
+    <div class="history-title">最近抽取记录</div>
+    <div id="historyBox"></div>
+</div>
+
+<script>
+// 文案库
+const blessSoft = [
+    "路过路灯时，灯光会悄悄为你多亮0.2秒，只有你的眼睛可以察觉。",
+    "你的水杯永远不会烫嘴，但水温永远不会刚好合适。",
+    "云朵偶尔会拼凑出你的轮廓，只有飞鸟能够看见。",
+    "当你叹气，身边会飘出肉眼几乎看不见的细碎微光，转瞬消散。",
+    "耳机里随机播放，总会跳到你记忆里遗忘很久的那首歌，但只会播放三秒就切走。",
+    "风吹过你的时候，会过滤掉世间一半刺耳的噪音，旁人听不见区别。",
+    "夜里闭眼，你偶尔能嗅到早已消失的旧气味，来自童年某一个下午。",
+    "走路的时候，地砖缝隙会悄悄避开你的脚尖，别人踩上去照旧绊脚。",
+    "你写下的草稿文字，会在被删除之后短暂保留在空气里，几秒之后彻底消散。",
+    "下雨的时候，落在你身上的雨滴会比别人的稍微凉一点点。",
+    "超市冷藏柜的冷气，每次开门都会优先向你的方向涌来。",
+    "你的影子会偷偷模仿你无意识的小动作，别人无法观察到。",
+    "翻开书本，总有一页纸张触感会格外柔软，每次都不是同一页。",
+    "晚风会记住你的呼吸节奏，但不会为任何人改变风向。"
+];
+const blessFunny = [
+    "你所有的袜子都不会丢失，但是永远无法凑成完整配对。",
+    "外卖永远准时送达，但汤料总会歪歪扭扭洒在盖子内侧。",
+    "手机永远不会没电，但锁屏时间总是比别人快半秒钟。",
+    "刷短视频总能刷到有意思的内容，点开评论区全部空空如也。",
+    "打喷嚏必定有人在念叨你，但是你永远不知道是谁。",
+    "排队永远处于队伍倒数第二位，永远排不到最后一个。",
+    "遥控器每次都精准对准设备，信号总是差一点点。",
+    "截图永远完美捕捉画面，唯独关键人物的表情会模糊一丢丢。",
+    "吃东西永远不会掉渣，但碎屑全部会掉进衣服缝隙深处。",
+    "闹钟响声格外悦耳，但无法把你从睡眠里拽出来。"
+];
+const blessPositive = [
+    "你认真做事的每一分钟，都会在未来某个时刻悄悄回赠给你。",
+    "今天会有人因为你的存在而感到开心，哪怕你并不知情。",
+    "你走过的弯路，最终都会变成别人问路时你能指出的捷径。",
+    "你正在变好，只是速度比你期待的要慢一点点。",
+    "会有一个你期待的消息，在合适的时候抵达你。",
+    "你的努力没有白费，有些回报只是还在路上。",
+    "你值得被温柔对待，包括被你自己温柔对待。",
+    "此刻让你焦虑的事，回头再看都会变成一件能笑着说出口的事。",
+    "你会遇见刚刚好的运气，不早也不晚。",
+    "你比自己以为的更坚韧，也更有办法。"
+];
+
+const curseTiny = [
+    "当你专心思考，耳边会持续传来极其微弱的细碎沙沙噪音，找不到来源。",
+    "手机亮度会在你不注意的时候，偷偷来回轻微跳动。",
+    "明明东西就放在眼前，视线会自动跳过它，要找很久。",
+    "听歌切歌，总会刚好卡在一句歌词的正中间切断。",
+    "脑子里循环一首歌，永远只循环副歌的后半句。",
+    "网页加载进度条疯狂前进，最后一秒卡住不动。",
+    "喝饮料，吸管永远会轻微贴住杯底，吸的时候发出咕噜噪音。",
+    "闭眼准备入睡，脑海会疯狂回放白天尴尬的碎片瞬间。",
+    "笔书写顺滑，放下之后笔头总会滚向桌子边缘。"
+];
+
+// 状态
+let onlyBlessMode = false;
+let lastPick = "";
+let history = JSON.parse(localStorage.getItem("spell_history")||"[]");
+
+const btnDraw = document.getElementById("drawBtn");
+const card = document.getElementById("resultCard");
+const tagEl = document.getElementById("typeTag");
+const textEl = document.getElementById("spellText");
+const copyBtn = document.getElementById("copyBtn");
+const switchEl = document.getElementById("modeSwitch");
+const historyBox = document.getElementById("historyBox");
+
+function renderHistory(){
+    historyBox.innerHTML = "";
+    history.forEach(t=>{
+        const div = document.createElement("div");
+        div.className = "history-item";
+        div.innerText = t;
+        historyBox.appendChild(div);
+    });
+}
+renderHistory();
+
+// 背景粒子
+const starsBox = document.getElementById("stars");
+for(let i=0;i<45;i++){
+    const s = document.createElement("i");
+    s.className = "star";
+    const size = Math.random()*3+1;
+    s.style.width = s.style.height = size + "px";
+    s.style.left = Math.random()*100 + "vw";
+    s.style.animationDuration = (Math.random()*14+10) + "s";
+    s.style.animationDelay = (-Math.random()*22) + "s";
+    starsBox.appendChild(s);
+}
+
+// 切换开关
+switchEl.onclick = ()=>{
+    onlyBlessMode = !onlyBlessMode;
+    switchEl.classList.toggle("on", onlyBlessMode);
+};
+
+// 抽取
+btnDraw.onclick = ()=>{
+    btnDraw.style.transform = "scale(0.96)";
+    setTimeout(()=>btnDraw.style.transform="",200);
+
+    let pool,typeLabel;
+    if(onlyBlessMode){
+        const r = Math.random();
+        if(r<0.45){
+            pool = blessPositive;
+            typeLabel = "积极祝福";
+        }else if(r<0.75){
+            pool = blessSoft;
+            typeLabel = "无效祝福";
+        }else{
+            pool = blessFunny;
+            typeLabel = "戏谑祝福";
+        }
+    }else{
+        const r = Math.random();
+        if(r<0.3){
+            pool = blessPositive;
+            typeLabel = "积极祝福";
+        }else if(r<0.55){
+            pool = blessSoft;
+            typeLabel = "无效祝福";
+        }else if(r<0.8){
+            pool = blessFunny;
+            typeLabel = "戏谑祝福";
+        }else{
+            pool = curseTiny;
+            typeLabel = "微小诅咒";
+        }
+    }
+    //避免和上一条重复
+    let pick;
+    do{
+        pick = pool[Math.floor(Math.random()*pool.length)];
+    }while(pick===lastPick && pool.length>1);
+    lastPick = pick;
+
+    tagEl.innerText = typeLabel;
+    tagEl.className = "tag " + (typeLabel==="积极祝福" ? "positive" : typeLabel==="无效祝福" ? "bless" : typeLabel==="戏谑祝福" ? "funny" : "curse");
+    textEl.innerText = pick;
+
+    // 重新触发卡片入场动画
+    card.classList.remove("show");
+    void card.offsetWidth;
+    card.classList.add("show");
+
+    //存入历史，最多5条
+    history.unshift(typeLabel + " " + pick);
+    history = history.slice(0,5);
+    localStorage.setItem("spell_history",JSON.stringify(history));
+    renderHistory();
+};
+
+//复制
+copyBtn.onclick = async ()=>{
+    try{
+        await navigator.clipboard.writeText(textEl.innerText);
+        copyBtn.innerText = "已复制 ✓";
+        setTimeout(()=>copyBtn.innerText="复制文本",1200);
+    }catch(e){
+        alert("复制失败，请手动选中文字复制");
+    }
+};
+</script>
+</body>
+</html>
